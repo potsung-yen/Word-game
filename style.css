@@ -1,7 +1,6 @@
 body {
-    /* 使用活潑的字體，若無則預設微軟正黑體 */
     font-family: 'Comic Sans MS', 'Microsoft JhengHei', sans-serif;
-    background-color: #f0f8ff; /* 淡淡的愛麗絲藍背景 */
+    background-color: #f0f8ff;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -19,21 +18,27 @@ body {
     text-align: center;
 }
 
-h1 { 
-    color: #ff6b6b; /* 活潑的紅色 */
-}
+h1 { color: #ff6b6b; }
 
-.player-info { 
-    margin-bottom: 20px; 
-}
+.player-info { margin-bottom: 10px; }
+.player-info input { padding: 8px; font-size: 16px; border-radius: 5px; border: 1px solid #ccc; }
 
-.player-info input { 
-    padding: 8px; 
-    font-size: 16px; 
-    border-radius: 5px; 
-    border: 1px solid #ccc; 
+/* 上傳按鈕區域 */
+.upload-area { margin-top: 15px; font-size: 14px; margin-bottom: 20px;}
+.upload-btn {
+    background-color: #f39c12;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: inline-block;
+    transition: transform 0.1s;
+    font-weight: bold;
 }
+.upload-btn:active { transform: scale(0.95); }
+.upload-status { margin-top: 5px; color: #2d3436; font-weight: bold; }
 
+/* 數據與錯題按鈕區域 */
 .stats {
     display: flex;
     justify-content: space-between;
@@ -51,22 +56,30 @@ h1 {
     padding: 8px 12px;
     border-radius: 8px;
     cursor: pointer;
-    /* 讓魔王按鈕有呼吸跳動的感覺 */
     animation: pulse 1.5s infinite; 
 }
 
+#exportBtn {
+    background-color: #00cec9;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-left: 10px;
+    transition: transform 0.1s;
+}
+#exportBtn:active { transform: scale(0.95); }
+
+/* 核心題目區域 */
 .question-box {
-    background-color: #ffeaa7; /* 溫暖的黃色底色 */
+    background-color: #ffeaa7;
     padding: 20px;
     border-radius: 15px;
     margin-bottom: 20px;
 }
 
-h2 { 
-    margin: 0 0 10px 0; 
-    color: #2d3436; 
-    font-size: 28px; 
-}
+h2 { margin: 0 0 10px 0; color: #2d3436; font-size: 28px; }
 
 .sound-btn {
     background-color: #0984e3;
@@ -99,22 +112,12 @@ h2 {
     transition: transform 0.1s;
 }
 
-/* 點擊按鈕時稍微縮小的回饋感 */
-.input-area button:active { 
-    transform: scale(0.95); 
-}
+.input-area button:active { transform: scale(0.95); }
 
-.feedback { 
-    font-size: 20px; 
-    font-weight: bold; 
-    height: 30px; 
-    margin-top: 15px;
-}
+.feedback { font-size: 20px; font-weight: bold; height: 30px; margin-top: 15px;}
+.correct { color: #00b894; }
+.wrong { color: #d63031; }
 
-.correct { color: #00b894; } /* 答對顯示綠色 */
-.wrong { color: #d63031; }   /* 答錯顯示紅色 */
-
-/* 魔王按鈕的動畫設定 */
 @keyframes pulse {
     0% { transform: scale(1); }
     50% { transform: scale(1.05); }
