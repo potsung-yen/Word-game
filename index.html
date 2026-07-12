@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>拼字小勇士</title>
+    <!-- 這裡會載入我們等一下要做的外觀設計檔 -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🗡️ 拼字小勇士 🛡️</h1>
+            <div class="player-info">
+                <input type="text" id="playerName" placeholder="輸入你的名字" value="小勇士">
+                <button onclick="startGame()">登入 / 切換</button>
+            </div>
+        </header>
+
+        <main id="gameArea" style="display: none;">
+            <div class="stats">
+                <span>🏆 分數: <span id="score">0</span></span>
+                <!-- 隱藏的魔王按鈕，錯題累積時會自動出現 -->
+                <button id="bossBtn" onclick="startBossBattle()" style="display: none;">👿 挑戰魔王</button>
+            </div>
+
+            <div class="question-box">
+                <h2 id="chineseHint">準備中...</h2>
+                <button onclick="speakWord()" class="sound-btn">🔊 聽發音</button>
+            </div>
+
+            <div class="input-area">
+                <input type="text" id="englishInput" placeholder="請輸入英文" autocomplete="off" onkeypress="handleEnter(event)">
+                <button onclick="checkAnswer()">送出攻擊 ⚔️</button>
+            </div>
+
+            <p id="feedbackMsg" class="feedback"></p>
+        </main>
+    </div>
+
+    <!-- 載入你剛剛做好的單字庫，以及等一下要做的遊戲邏輯 -->
+    <script src="words.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>
