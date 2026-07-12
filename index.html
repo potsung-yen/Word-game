@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>拼字小勇士</title>
-    <!-- 這裡會載入我們等一下要做的外觀設計檔 -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -15,13 +14,22 @@
                 <input type="text" id="playerName" placeholder="輸入你的名字" value="小勇士">
                 <button onclick="startGame()">登入 / 切換</button>
             </div>
+            
+            <!-- 上傳單字庫區域 -->
+            <div class="upload-area" id="uploadArea" style="display: none;">
+                <label for="uploadCsv" class="upload-btn">📂 上傳新進度 (CSV)</label>
+                <input type="file" id="uploadCsv" accept=".csv" style="display: none;" onchange="handleFileUpload(event)">
+                <div id="uploadStatus" class="upload-status"></div>
+            </div>
         </header>
 
         <main id="gameArea" style="display: none;">
             <div class="stats">
                 <span>🏆 分數: <span id="score">0</span></span>
-                <!-- 隱藏的魔王按鈕，錯題累積時會自動出現 -->
+                <!-- 隱藏的魔王按鈕 -->
                 <button id="bossBtn" onclick="startBossBattle()" style="display: none;">👿 挑戰魔王</button>
+                <!-- 下載錯題本按鈕 -->
+                <button id="exportBtn" onclick="exportMistakes()">📥 下載錯題</button>
             </div>
 
             <div class="question-box">
@@ -38,7 +46,7 @@
         </main>
     </div>
 
-    <!-- 載入你剛剛做好的單字庫，以及等一下要做的遊戲邏輯 -->
+    <!-- 載入單字庫與遊戲邏輯 -->
     <script src="words.js"></script>
     <script src="game.js"></script>
 </body>
