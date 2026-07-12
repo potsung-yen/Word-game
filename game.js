@@ -3,16 +3,23 @@ let currentWord = {};
 let isBossMode = false;
 let bossWordList = [];
 
-// 初始化語音 API (用來唸英文發音)
+// 初始化語音 API
 const synth = window.speechSynthesis;
 
 // 1. 開始遊戲與登入
 function startGame() {
     currentPlayer = document.getElementById("playerName").value.trim() || "小勇士";
     document.getElementById("gameArea").style.display = "block";
+    document.getElementById("uploadArea").style.display = "block"; // 顯示上傳按鈕
     updateScoreBoard();
     checkBossAvailable();
     nextQuestion();
+}
+
+// 取得「預設單字 + 玩家自訂擴充生字」的合併題庫
+function getCombinedWordList() {
+    let customWords = JSON.parse(localStorage.getItem(`SpellingHero_CustomWords_${currentPlayer}`)) || [];
+    return wordList.concat(customWords);
 }
 
 // 2. 產出下一題
@@ -29,66 +36,53 @@ function nextQuestion() {
             nextQuestion();
             return;
         }
-        // 魔王模式：從錯題本中隨機抽題
         const randomIndex = Math.floor(Math.random() * bossWordList.length);
         currentWord = bossWordList[randomIndex];
     } else {
-        // 一般模式：從全部 510 個單字中隨機抽題
-        const randomIndex = Math.floor(Math.random() * wordList.length);
-        currentWord = wordList[randomIndex];
+        // 從合併後的題庫抽題
+        const combinedList = getCombinedWordList();
+        const randomIndex = Math.floor(Math.random() * combinedList.length);
+        currentWord = combinedList[randomIndex];
     }
 
     document.getElementById("chineseHint").innerText = currentWord.chinese;
-    speakWord(); // 出題時自動唸一次發音
+    speakWord(); 
 }
 
 // 3. 播放英文發音
 function speakWord() {
-    if (synth.speaking) {
-        console.error('語音正在播放中');
-        return;
-    }
-    
-    // 過濾掉 a, an, the 以及括號內的內容，讓發音更準確
+    if (synth.speaking) { return; }
     let textToSpeak = currentWord.english.replace(/^(a |an |the )/i, '').replace(/\([^)]*\)/g, '').trim();
-    
     const utterThis = new SpeechSynthesisUtterance(textToSpeak);
-    utterThis.lang = 'en-US'; // 美式發音
-    utterThis.rate = 0.8;     // 語速稍微放慢，適合小朋友聽
+    utterThis.lang = 'en-US'; 
+    utterThis.rate = 0.8;     
     synth.speak(utterThis);
 }
 
-// 4. 檢查答案與錯題本邏輯
+// 4. 檢查答案與錯題邏輯
 function checkAnswer() {
     const userInput = document.getElementById("englishInput").value.trim().toLowerCase();
-    
-    // 將正確答案轉小寫
     const correctAnswer = currentWord.english.toLowerCase();
-    
-    // 建立「乾淨版」解答：過濾掉 a, an, the 跟括號，例如 "a schoolmate" 變成 "schoolmate"
     const correctClean = correctAnswer.replace(/^(a |an |the )/i, '').replace(/\([^)]*\)/g, '').trim();
 
     const feedback = document.getElementById("feedbackMsg");
     let playerRecord = getPlayerRecord();
 
-    // 只要輸入完全符合，或是符合「乾淨版」解答都算對！
     if (userInput === correctAnswer || userInput === correctClean) {
         feedback.innerText = "✨ 答對了！太厲害了！";
         feedback.className = "feedback correct";
         playerRecord.score += 10;
         
-        // 如果是在打魔王，答對一次就扣除錯誤次數
         if (playerRecord.mistakes[correctAnswer]) {
             playerRecord.mistakes[correctAnswer].count -= 1;
             if (playerRecord.mistakes[correctAnswer].count <= 0) {
-                delete playerRecord.mistakes[correctAnswer]; // 完全學會，從錯題本移除
+                delete playerRecord.mistakes[correctAnswer]; 
             }
         }
     } else {
         feedback.innerText = `❌ 哎呀！正確拼法是: ${currentWord.english}`;
         feedback.className = "feedback wrong";
         
-        // 紀錄錯題，寫入 LocalStorage
         if (!playerRecord.mistakes[correctAnswer]) {
             playerRecord.mistakes[correctAnswer] = { ...currentWord, count: 1 };
         } else {
@@ -100,17 +94,14 @@ function checkAnswer() {
     updateScoreBoard();
     checkBossAvailable();
 
-    // 延遲 1.5 秒後換下一題，讓小朋友看清楚正確答案
     setTimeout(() => {
         if(isBossMode) {
-             // 隨時更新魔王題庫（把剛剛答對移除的單字排除）
              bossWordList = Object.values(getPlayerRecord().mistakes);
         }
         nextQuestion();
     }, 1500);
 }
 
-// 支援按下 Enter 鍵送出答案
 function handleEnter(event) {
     if (event.key === "Enter") {
         checkAnswer();
@@ -118,7 +109,7 @@ function handleEnter(event) {
 }
 
 // ==========================================
-// 資料庫管理 (使用瀏覽器 LocalStorage)
+// 資料庫管理 (LocalStorage)
 // ==========================================
 function getPlayerRecord() {
     let data = localStorage.getItem(`SpellingHero_${currentPlayer}`);
@@ -133,12 +124,10 @@ function updateScoreBoard() {
     document.getElementById("score").innerText = getPlayerRecord().score;
 }
 
-// 檢查是否要顯示魔王按鈕
 function checkBossAvailable() {
     let mistakes = Object.keys(getPlayerRecord().mistakes).length;
     const bossBtn = document.getElementById("bossBtn");
     
-    // 如果錯題累積超過 3 題，且目前不在魔王模式，就出現魔王按鈕
     if (mistakes >= 3 && !isBossMode) {
         bossBtn.style.display = "inline-block";
         bossBtn.innerText = `👿 挑戰魔王 (${mistakes}題)`;
@@ -147,10 +136,84 @@ function checkBossAvailable() {
     }
 }
 
-// 啟動魔王模式
 function startBossBattle() {
     isBossMode = true;
     bossWordList = Object.values(getPlayerRecord().mistakes);
     alert("⚔️ 魔王戰開始！這都是你之前不小心拼錯的單字喔，準備接招！");
     nextQuestion();
+}
+
+// ==========================================
+// 匯出錯題本功能 (下載成 CSV 檔案)
+// ==========================================
+function exportMistakes() {
+    let playerRecord = getPlayerRecord();
+    let mistakes = Object.values(playerRecord.mistakes);
+
+    if (mistakes.length === 0) {
+        alert("🎉 太棒了！目前沒有常錯單字喔！");
+        return;
+    }
+
+    let csvContent = "\uFEFF英文單字,中文意思,錯誤次數\n";
+    mistakes.sort((a, b) => b.count - a.count);
+
+    mistakes.forEach(word => {
+        let safeEnglish = `"${word.english}"`;
+        let safeChinese = `"${word.chinese}"`;
+        csvContent += `${safeEnglish},${safeChinese},${word.count}\n`;
+    });
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `${currentPlayer}_錯題本.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+// ==========================================
+// 上傳新進度 (讀取 CSV 並擴充單字庫)
+// ==========================================
+function handleFileUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const text = e.target.result;
+        const rows = text.split('\n');
+        let newWords = [];
+
+        for (let i = 0; i < rows.length; i++) {
+            const row = rows[i].trim();
+            if (!row) continue;
+            
+            const cols = row.split(',');
+            if (cols.length >= 2) {
+                let eng = cols[0].replace(/['"]/g, '').trim();
+                let chi = cols[1].replace(/['"]/g, '').trim();
+                
+                if (eng && chi && eng !== "英文單字" && eng !== "english") {
+                    newWords.push({ english: eng, chinese: chi });
+                }
+            }
+        }
+
+        if (newWords.length > 0) {
+            let existingCustomWords = JSON.parse(localStorage.getItem(`SpellingHero_CustomWords_${currentPlayer}`)) || [];
+            existingCustomWords = existingCustomWords.concat(newWords);
+            
+            localStorage.setItem(`SpellingHero_CustomWords_${currentPlayer}`, JSON.stringify(existingCustomWords));
+            
+            document.getElementById("uploadStatus").innerText = `✅ 成功為 ${currentPlayer} 擴充 ${newWords.length} 個生字！`;
+            event.target.value = ''; 
+        } else {
+            alert("找不到單字，請確保 CSV 格式第一欄是英文、第二欄是中文喔！");
+        }
+    };
+    reader.readAsText(file, "UTF-8");
 }
